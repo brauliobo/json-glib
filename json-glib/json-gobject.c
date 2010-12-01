@@ -36,6 +36,7 @@
 #include "config.h"
 #endif
 
+#include <glib/gstdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -192,6 +193,7 @@ json_gobject_new (GType       gtype,
 
   n_members = json_object_get_size (object);
   members = json_object_get_members (object);
+  printf("json members %d\n", n_members);
   members_left = NULL;
 
   /* first pass: construct and construct-only properties; here
@@ -227,6 +229,7 @@ json_gobject_new (GType       gtype,
 
       val = json_object_get_member (object, member_name);
       res = json_deserialize_pspec (&param.value, pspec, val);
+      printf("member res: %s", res ? "true" : "false");
       if (!res)
         g_value_unset (&param.value);
       else
@@ -242,6 +245,7 @@ json_gobject_new (GType       gtype,
       members_left = g_list_prepend (members_left, l->data);
     }
 
+  printf("params %d\n", construct_params->len);
   retval = g_object_newv (gtype,
                           construct_params->len,
                           (GParameter *) construct_params->data);
@@ -319,7 +323,7 @@ json_gobject_new (GType       gtype,
        */
       if (res)
         {
-          JSON_NOTE (GOBJECT, "Calling set_property('%s', '%s')",
+          g_message ("Calling set_property('%s', '%s')",
                      pspec->name,
                      g_type_name (G_VALUE_TYPE (&value)));
           g_object_set_property (retval, pspec->name, &value);
@@ -402,6 +406,8 @@ json_deserialize_pspec (GValue     *value,
   GValue node_value = { 0, };
   gboolean retval = FALSE;
 
+  g_message ("Deserializing a %s of type %s", pspec->name, g_type_name (pspec->value_type));
+
   if (G_TYPE_FUNDAMENTAL (G_VALUE_TYPE (value)) == G_TYPE_BOXED)
     {
       JsonNodeType node_type = json_node_get_node_type (node);
@@ -457,6 +463,40 @@ json_deserialize_pspec (GValue     *value,
           g_value_set_boxed (value, str_array->pdata);
 
           g_ptr_array_free (str_array, TRUE);
+
+          retval = TRUE;
+        }
+      else if (G_VALUE_HOLDS (value, G_TYPE_VALUE_ARRAY))
+        {
+          JsonArray *array = json_node_get_array (node);
+          guint i, array_len = json_array_get_length (array);
+          GValueArray *str_array = g_value_array_new (array_len);
+	  str_array->n_values = array_len;
+
+	  g_message ("Array type is %s", g_type_name (G_PARAM_SPEC_VALUE_ARRAY(pspec)->element_spec->value_type));
+
+          for (i = 0; i < array_len; i++)
+            {
+              JsonNode *val = json_array_get_element (array, i);
+
+              //if (JSON_NODE_TYPE (val) != JSON_NODE_VALUE)
+              //  continue;
+
+              gboolean retval;
+	      GValue *value;
+	      value = g_value_array_get_nth(str_array, i);
+              g_value_init (value, G_PARAM_SPEC_VALUE_TYPE (G_PARAM_SPEC_VALUE_ARRAY(pspec)->element_spec));
+	      retval = json_deserialize_pspec (value,
+					       G_PARAM_SPEC_VALUE_ARRAY(pspec)->element_spec,
+					       val);
+	      if (!retval)
+		      puts("TREAT ME!");
+
+            }
+
+          g_value_set_boxed (value, str_array);
+
+          g_value_array_free (str_array);
 
           retval = TRUE;
         }
@@ -627,6 +667,42 @@ json_serialize_pspec (const GValue *real_value,
               JsonNode *str = json_node_new (JSON_NODE_VALUE);
 
               json_node_set_string (str, strv[i]);
+              json_array_add_element (array, str);
+            }
+
+          retval = json_node_new (JSON_NODE_ARRAY);
+          json_node_take_array (retval, array);
+        }
+      else if (G_VALUE_HOLDS (real_value, G_TYPE_VALUE_ARRAY))
+        {
+		puts("serialize");
+          GValueArray *strv = g_value_get_boxed (real_value);
+	  if (strv == NULL) {
+		  retval = NULL;
+		  break;
+	  }
+          gint i, strv_len;
+          JsonArray *array;
+
+          strv_len = strv->n_values;
+	  printf("%d\n", strv_len);
+          array = json_array_sized_new (strv_len);
+
+          for (i = 0; i < strv_len; i++)
+            {
+              JsonNode *str = NULL;
+ 
+	      JsonNodeType node_type;
+	      str = json_serialize_pspec(&strv->values[i], G_PARAM_SPEC_VALUE_ARRAY(pspec)->element_spec);
+              //if (json_boxed_can_serialize (G_VALUE_TYPE (&strv->values[i]), &node_type))
+                //{
+                  //gpointer boxed = g_value_get_boxed (real_value);
+
+                  //str = json_boxed_serialize (G_VALUE_TYPE (real_value), boxed);
+                //}
+	      if (str == NULL)
+		      continue;
+
               json_array_add_element (array, str);
             }
 
