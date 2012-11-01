@@ -28,7 +28,6 @@ static void
 g_value_object_copy_value (const GValue *src_value,
 			   GValue	*dest_value)
 {
-	puts("value copy");
   if (src_value->data[0].v_pointer)
     dest_value->data[0].v_pointer = g_object_ref (src_value->data[0].v_pointer);
   else
@@ -60,7 +59,7 @@ g_value_object_collect_value (GValue	  *value,
   if (collect_values[0].v_pointer)
     {
       GObject *object = collect_values[0].v_pointer;
-      
+
       if (object->g_type_instance.g_class == NULL)
 	return g_strconcat ("invalid unclassed object pointer for value type `",
 			    G_VALUE_TYPE_NAME (value),
@@ -78,7 +77,7 @@ g_value_object_collect_value (GValue	  *value,
     }
   else
     value->data[0].v_pointer = NULL;
-  
+
   return NULL;
 }
 
@@ -89,7 +88,7 @@ g_value_object_lcopy_value (const GValue *value,
 			    guint        collect_flags)
 {
   GObject **object_p = collect_values[0].v_pointer;
-  
+
   if (!object_p)
     return g_strdup_printf ("value location for `%s' passed as NULL", G_VALUE_TYPE_NAME (value));
 
@@ -99,7 +98,7 @@ g_value_object_lcopy_value (const GValue *value,
     *object_p = value->data[0].v_pointer;
   else
     *object_p = g_object_ref (value->data[0].v_pointer);
-  
+
   return NULL;
 }
 
@@ -124,7 +123,6 @@ GObject* value_object_copy(GObject *gobject)
 		g_value_unset (&value);
 	}
 
-	puts("here");
 	new_object = g_object_newv (value_get_type(), n_pspecs, parameters);
 	return new_object;
 }

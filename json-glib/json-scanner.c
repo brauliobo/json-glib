@@ -36,7 +36,7 @@
 #endif
 
 #include <glib.h>
-#include <glib/gprintf.h>
+#include <glib.h>
 
 #include "json-scanner.h"
 
