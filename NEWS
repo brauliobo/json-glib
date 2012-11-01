@@ -1,10 +1,33 @@
-Overview of changes for 0.12.2
+Overview of changes for 0.16.0
 ==============================
-• Build fix on win32
-• Implement support for bare values in JsonGenerator
-• Do not require GLib 2.20 for the test suite
-• Do not lose precision when serializing floating point values
-• Improve introspection data
+• Fixes for building with VisualStudio. [Chun-wei Fan]
+• Allow out-of-tree builds. [Colin Walters]
+• Bump the dependency on GLib to 2.31.
+• Use the new deprecation system provided by GLib.
+• Simplify the value handling inside JsonNode.
+• Use lcov to generate coverage reports for the test suite.
+• Check expected ABI when building.
+• Drop dependency on gnome-autogen.sh when building from Git.
+
+Overview of changes for 0.14.0
+==============================
+• Documentation fixes
+• Bump the dependency on GLib to 2.26
+• Allow building on Windows using VisualStudio [Chun-wei Fan]
+• Add JSON ↔ GVariant translation [Eduardo Lima Mitev]
+• Improve sanity checks when (de)serializing GObject
+  properties [Tristan Van Berkom]
+• Add missing introspection annotations [Luca Bruno]
+• Add JsonReader.list_members()
+• Allow using JsonReader.read_element() on JSON objects
+• Remove all G_CONST_RETURN usage after the deprecation
+• Allow JsonSerializable to override the introspection and
+  modification of properties
+• Add i18n support for GError messages
+• Do not serialize GObject properties that match their default
+  values.
+• Make JsonReader perform a stricter validation especially when using
+  the strongly typed accessors.
 
 Overview of changes for 0.12.0
 ==============================

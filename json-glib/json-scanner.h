@@ -42,8 +42,7 @@ typedef struct _JsonScanner       JsonScanner;
 typedef struct _JsonScannerConfig JsonScannerConfig;
 
 typedef void (* JsonScannerMsgFunc) (JsonScanner *scanner,
-                                     gchar       *message,
-                                     gboolean     is_error);
+                                     gchar       *message);
 
 /**
  * JsonTokenType:
@@ -107,7 +106,6 @@ struct _JsonScanner
   
   /* to be considered private */
   GHashTable *symbol_table;
-  gint input_fd;
   const gchar *text;
   const gchar *text_end;
   gchar *buffer;
@@ -117,50 +115,32 @@ struct _JsonScanner
   JsonScannerMsgFunc msg_handler;
 };
 
+G_GNUC_INTERNAL
 JsonScanner *json_scanner_new                  (void);
+G_GNUC_INTERNAL
 void         json_scanner_destroy              (JsonScanner *scanner);
-void         json_scanner_input_file           (JsonScanner *scanner,
-                                                gint         input_fd);
-void         json_scanner_sync_file_offset     (JsonScanner *scanner);
+G_GNUC_INTERNAL
 void         json_scanner_input_text           (JsonScanner *scanner,
                                                 const gchar *text,
                                                 guint        text_len);
+G_GNUC_INTERNAL
 GTokenType   json_scanner_get_next_token       (JsonScanner *scanner);
+G_GNUC_INTERNAL
 GTokenType   json_scanner_peek_next_token      (JsonScanner *scanner);
-GTokenType   json_scanner_cur_token            (JsonScanner *scanner);
-GTokenValue  json_scanner_cur_value            (JsonScanner *scanner);
-guint        json_scanner_cur_line             (JsonScanner *scanner);
-guint        json_scanner_cur_position         (JsonScanner *scanner);
-gboolean     json_scanner_eof                  (JsonScanner *scanner);
-guint        json_scanner_set_scope            (JsonScanner *scanner,
-                                                guint        scope_id);
+G_GNUC_INTERNAL
 void         json_scanner_scope_add_symbol     (JsonScanner *scanner,
                                                 guint        scope_id,
                                                 const gchar *symbol,
                                                 gpointer     value);
-void         json_scanner_scope_remove_symbol  (JsonScanner *scanner,
-                                                guint        scope_id,
-                                                const gchar *symbol);
-gpointer     json_scanner_scope_lookup_symbol  (JsonScanner *scanner,
-                                                guint        scope_id,
-                                                const gchar *symbol);
-void         json_scanner_scope_foreach_symbol (JsonScanner *scanner,
-                                                guint        scope_id,
-                                                GHFunc       func,
-                                                gpointer     user_data);
-gpointer     json_scanner_lookup_symbol        (JsonScanner *scanner,
-                                                const gchar *symbol);
+G_GNUC_INTERNAL
 void         json_scanner_unexp_token          (JsonScanner *scanner,
                                                 GTokenType   expected_token,
                                                 const gchar *identifier_spec,
                                                 const gchar *symbol_spec,
                                                 const gchar *symbol_name,
-                                                const gchar *message,
-                                                gint         is_error);
+                                                const gchar *message);
+G_GNUC_INTERNAL
 void         json_scanner_error                (JsonScanner *scanner,
-                                                const gchar *format,
-                                                ...) G_GNUC_PRINTF (2,3);
-void         json_scanner_warn                 (JsonScanner *scanner,
                                                 const gchar *format,
                                                 ...) G_GNUC_PRINTF (2,3);
 

@@ -1,5 +1,5 @@
 /* json-types.h - JSON data types
- * 
+ *
  * This file is part of JSON-GLib
  * Copyright (C) 2007  OpenedHand Ltd.
  * Copyright (C) 2009  Intel Corp.
@@ -31,6 +31,14 @@
 #include <glib-object.h>
 
 G_BEGIN_DECLS
+
+#ifdef JSON_DISABLE_DEPRECATION_WARNINGS
+#define JSON_DEPRECATED
+#define JSON_DEPRECATED_FOR(x)
+#else
+#define JSON_DEPRECATED         G_DEPRECATED
+#define JSON_DEPRECATED_FOR(x)  G_DEPRECATED_FOR(x)
+#endif
 
 /**
  * JSON_NODE_TYPE:
@@ -177,14 +185,33 @@ typedef void (* JsonArrayForeach) (JsonArray  *array,
  */
 GType                 json_node_get_type        (void) G_GNUC_CONST;
 JsonNode *            json_node_new             (JsonNodeType  type);
+
+JsonNode *            json_node_alloc           (void);
+JsonNode *            json_node_init            (JsonNode     *node,
+                                                 JsonNodeType  type);
+JsonNode *            json_node_init_object     (JsonNode     *node,
+                                                 JsonObject   *object);
+JsonNode *            json_node_init_array      (JsonNode     *node,
+                                                 JsonArray    *array);
+JsonNode *            json_node_init_int        (JsonNode     *node,
+                                                 gint64        value);
+JsonNode *            json_node_init_double     (JsonNode     *node,
+                                                 gdouble       value);
+JsonNode *            json_node_init_boolean    (JsonNode     *node,
+                                                 gboolean      value);
+JsonNode *            json_node_init_string     (JsonNode     *node,
+                                                 const char   *value);
+JsonNode *            json_node_init_null       (JsonNode     *node);
+
 JsonNode *            json_node_copy            (JsonNode     *node);
 void                  json_node_free            (JsonNode     *node);
+
 JsonNodeType          json_node_get_node_type   (JsonNode     *node);
 GType                 json_node_get_value_type  (JsonNode     *node);
 void                  json_node_set_parent      (JsonNode     *node,
                                                  JsonNode     *parent);
 JsonNode *            json_node_get_parent      (JsonNode     *node);
-gchar *               json_node_type_name       (JsonNode     *node);
+const gchar *         json_node_type_name       (JsonNode     *node);
 
 void                  json_node_set_object      (JsonNode     *node,
                                                  JsonObject   *object);
@@ -204,7 +231,7 @@ void                  json_node_get_value       (JsonNode     *node,
                                                  GValue       *value);
 void                  json_node_set_string      (JsonNode     *node,
                                                  const gchar  *value);
-gchar *               json_node_get_string      (JsonNode     *node);
+const gchar *         json_node_get_string      (JsonNode     *node);
 gchar *               json_node_dup_string      (JsonNode     *node);
 void                  json_node_set_int         (JsonNode     *node,
                                                  gint64        value);
@@ -225,11 +252,10 @@ JsonObject *          json_object_new                (void);
 JsonObject *          json_object_ref                (JsonObject  *object);
 void                  json_object_unref              (JsonObject  *object);
 
-#ifndef JSON_DISABLE_DEPRECATED
+JSON_DEPRECATED_FOR(json_object_set_member)
 void                  json_object_add_member         (JsonObject  *object,
                                                       const gchar *member_name,
-                                                      JsonNode    *node) G_GNUC_DEPRECATED;
-#endif /* JSON_DISABLE_DEPRECATED */
+                                                      JsonNode    *node);
 
 void                  json_object_set_member         (JsonObject  *object,
                                                       const gchar *member_name,
@@ -265,7 +291,7 @@ gdouble               json_object_get_double_member  (JsonObject  *object,
                                                       const gchar *member_name);
 gboolean              json_object_get_boolean_member (JsonObject  *object,
                                                       const gchar *member_name);
-gchar *               json_object_get_string_member  (JsonObject  *object,
+const gchar *         json_object_get_string_member  (JsonObject  *object,
                                                       const gchar *member_name);
 gboolean              json_object_get_null_member    (JsonObject  *object,
                                                       const gchar *member_name);
@@ -312,7 +338,7 @@ gdouble               json_array_get_double_element  (JsonArray   *array,
                                                       guint        index_);
 gboolean              json_array_get_boolean_element (JsonArray   *array,
                                                       guint        index_);
-gchar *               json_array_get_string_element  (JsonArray   *array,
+const gchar *         json_array_get_string_element  (JsonArray   *array,
                                                       guint        index_);
 gboolean              json_array_get_null_element    (JsonArray   *array,
                                                       guint        index_);
